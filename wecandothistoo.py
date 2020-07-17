@@ -139,19 +139,22 @@ for user in allusers:
                     
              
 activeusers = set()
-for submission in reddit2.subreddit("WeCanDoThisToo").new(limit=1000):
+for submission in reddit2.subreddit("WeCanDoThisToo").new(limit=1000):        #check activity of users
     if submission.created_utc<(nowtime-15552000)
         break
-    activeusers.add(submission.author)
+    if submission.created_utc>(nowtime-lasttime):   #add to list of active users if submission was between now and last sweep
+        activeusers.add(submission.author)
     submission.comments.replace_more(limit=None)
     if submission.comments.list():
-        for comment in submission.comments.list():
-            activeusers.add(comment.author)
+        for comment in submission.comments.list()
+            if comment.created_utc>(nowtime-lasttime): #add to list of active users if comment was between now and last sweep
+                activeusers.add(comment.author)
             
 for activeuser in activeusers:
     for user in allusers:
         if activeruser.name==user.name:
             user.lastaction=nowtime
+            #update lastaction of active users to current time
              
  fallenusers = set()
              
