@@ -197,3 +197,4 @@ for WCDT2usertoadd in WCDT2userstoadd:
     reddit2.subreddit('wecandothistoo').contributor.add(WCDT2usertoadd.username)
 
 #TODO generate post
+#TODO NUMBERS MASON, I FORGOT THE NUMBERS
