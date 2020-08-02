@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
 import praw
 import re
 from datetime import datetime
@@ -31,7 +37,11 @@ class WCDT2user:                    #custom class to save users
     
     def __repr__(self):
         return f'({self.user})'
-    
+
+
+# In[12]:
+
+
 allpossibleusers = set();      #set to contain all users that could be added
 i=0;
 j=0;
@@ -44,6 +54,13 @@ for line in file3:
     fallenusers_pickled=fallenusers_pickled+line
 file3.close()           
 fallenusers_all=jsonpickle.decode(fallenusers_pickled)
+
+file3 = open("allusers.txt", "r+")  #loading list of all fallen users to check that we dont add a user thats already in
+allusersold_pickled=""
+for line in file3:
+    allusersold_pickled=allusersold_pickled+line
+file3.close()           
+allusersold=jsonpickle.decode(allusersold_pickled)
 
 #print("ullo")
 
@@ -61,14 +78,25 @@ for submission in reddit.subreddit("all").hot(limit=10):   #search all comments 
         k=k+1;
         j=j+1;
         print("Users: "+str(j))
-        for fallen in fallenusers_all: #check if users was already removed
-            if fallen.username==comment.author.name:
-                add=False
+        if comment.author is None:
+            add=False
+        if add:
+            for fallen in fallenusers_all: #check if users was already removed
+                if fallen.username==comment.author.name:
+                    add=False
+        if add:
+            for userino in allusersold: #check if users was already removed
+                if userino.username==comment.author.name:
+                    add=False
         if add and comment.author:
             allpossibleusers.add(comment.author)
         
 print(allpossibleusers)
 print(len(allpossibleusers))
+
+
+# In[13]:
+
 
 import time
 import random
@@ -108,9 +136,13 @@ while not_finished:
 print(len(userstoadd))
 print(userstoadd)
 
+
+# In[14]:
+
+
 now = datetime.now()
     
-dt_string = now.strftime("%Y.%m.%d")
+dt_string = now.strftime("%Y-%m-%d")
 WCDT2userstoadd = [];
 
 for x in userstoadd:                 #transfer usertoadd to a list in our custom class
@@ -120,6 +152,10 @@ for x in userstoadd:                 #transfer usertoadd to a list in our custom
 with open(dt_string+" - new users.txt", "w") as f:
     f.write(jsonpickle.encode(WCDT2userstoadd))
 f.closed
+
+
+# In[15]:
+
 
 file1 = open("allusers.txt", "r+")  #import list of all current users
 allusers_pickled=""
@@ -140,7 +176,12 @@ senior_lasttime=lasttime-(604800*5)
 for user in allusers:            #give older users senior status
     if user.status=="new" and nowtime-user.timejoined>(8*604800):
              user.status="senior"
-              
+                    
+
+
+# In[16]:
+
+
 activeusers = []
 for submission in reddit2.subreddit("WeCanDoThisToo").new(limit=1000):        #check activity of users
     if submission.created_utc<(nowtime-15552000):
@@ -162,6 +203,11 @@ for activeuser in activeusers:
             
 for x in WCDT2userstoadd:       #add new users to list of all users
     allusers.append(x)
+
+
+# In[17]:
+
+
 fallenusers = []
              
 allusers_new=allusers.copy()        #remove fallen users from list
@@ -202,11 +248,19 @@ with open("lasttime.txt", "w") as f: #export new time of sweep
     f.write(jsonpickle.encode(nowtime))
 f.closed
 
+
+# In[ ]:
+
+
 for fallenuser in fallenusers: #remove fallen users from sub
     reddit2.subreddit('wecandothistoo').contributor.remove(fallenuser.username)
 for WCDT2usertoadd in WCDT2userstoadd: #add new users to sub
     reddit2.subreddit('wecandothistoo').contributor.add(WCDT2usertoadd.username)
-    
+
+
+# In[18]:
+
+
 title=dt_string+" - Bot Recap"
 selftext=""
 selftext=selftext+"# Users removed"
@@ -216,10 +270,14 @@ for fallenuser in fallenusers:
     selftext=selftext+"- \#"+str(fallenuser.number)+" /u/"+fallenuser.username+"\n"
 selftext=selftext+"\n"
 selftext=selftext+"\n"
-selftext=selftext+"# Users added"
+selftext=selftext+"# New Users"
 selftext=selftext+"\n"
 selftext=selftext+"\n"
 for newuser in WCDT2userstoadd:
     selftext=selftext+"- \#"+str(newuser.number)+" /u/"+newuser.username+"\n"
-submission2=subreddit2.submit(title=title, selftext=selftext)
-#print(selftext)
+#submission2=subreddit2.submit(title=title, selftext=selftext)
+print(selftext)
+
+
+
+
